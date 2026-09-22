@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="TCA curriculum planning board for the January 2027 level system." />
+    <meta name="theme-color" content="#112f43" />
+    <meta name="referrer" content="no-referrer" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+    <title>TCA Curriculum Studio</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <div id="app-shell" class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">♞</div>
+          <div>
+            <span class="brand-kicker">The Chess Academy</span>
+            <strong>Curriculum Studio</strong>
+          </div>
+        </div>
+
+        <label class="version-input">
+          <span>Board name</span>
+          <input id="version-name" maxlength="80" value="January 2027 · Initial curriculum draft" />
+        </label>
+
+        <div class="top-actions">
+          <div class="save-state" id="save-state" title="Changes are stored only in this browser">
+            <span class="save-dot"></span>
+            <span id="save-label">Saved on this device</span>
+          </div>
+          <div class="progress-pill" title="Filled curriculum positions"><strong id="placed-count">95</strong><span>/100</span></div>
+          <button class="icon-btn" id="undo-btn" type="button" aria-label="Undo" title="Undo">↶</button>
+          <button class="icon-btn" id="redo-btn" type="button" aria-label="Redo" title="Redo">↷</button>
+          <button class="btn btn-ghost" id="versions-btn" type="button">Versions</button>
+          <button class="btn btn-ghost" id="present-btn" type="button"><span aria-hidden="true">▣</span> Present</button>
+          <details class="action-menu" id="share-menu">
+            <summary class="btn btn-primary">Share & export <span aria-hidden="true">▾</span></summary>
+            <div class="menu" role="menu">
+              <button type="button" data-action="share-copy">Share a copy</button>
+              <button type="button" data-action="export-json">Download JSON</button>
+              <button type="button" data-action="export-csv">Download CSV</button>
+              <button type="button" data-action="import-json">Import JSON</button>
+              <hr />
+              <button type="button" data-action="print">Print / save PDF</button>
+              <button type="button" class="danger-text" data-action="reset">Reset to original draft</button>
+            </div>
+          </details>
+          <input id="import-file" class="hidden" type="file" accept="application/json,.json" />
+        </div>
+      </header>
+
+      <nav class="view-tabs" aria-label="Main views">
+        <button class="active" type="button" data-view="board">Curriculum board</button>
+        <button type="button" data-view="overview">Overview & checks</button>
+        <span class="device-note">Local copy · not live-synced</span>
+      </nav>
+
+      <div class="workspace">
+        <aside class="library-panel" aria-label="Topic library">
+          <div class="panel-heading">
+            <div><span class="eyebrow">Explore without assigning</span><h2>Topic library</h2></div>
+            <span class="count-badge" id="library-count">379</span>
+          </div>
+          <div class="search-row">
+            <span aria-hidden="true">⌕</span>
+            <input id="library-search" type="search" placeholder="Search topic, variant or book…" aria-label="Search topic library" />
+          </div>
+          <div class="filter-row">
+            <select id="macro-filter" aria-label="Filter topic area"><option value="all">All areas</option></select>
+            <select id="sort-filter" aria-label="Sort topics">
+              <option value="alpha">A–Z</option>
+              <option value="books">Most books</option>
+            </select>
+          </div>
+          <button class="btn btn-soft full-width" id="custom-topic-btn" type="button">＋ Create a custom topic</button>
+          <div class="library-tabs" role="tablist">
+            <button class="active" type="button" role="tab" data-library-tab="catalog">Catalogue <span id="catalog-tab-count">379</span></button>
+            <button type="button" role="tab" data-library-tab="pending">Unassigned <span id="pending-tab-count">0</span></button>
+          </div>
+          <div class="topic-list" id="topic-list" aria-live="polite"></div>
+          <div class="library-footnote"><span aria-hidden="true">ⓘ</span><span>Use ＋ to add from the catalogue. Drag assigned topics to rearrange them.</span></div>
+        </aside>
+
+        <main class="board-area">
+          <section id="board-view" class="board-view">
+            <div class="board-toolbar">
+              <div><span class="eyebrow">10 levels · 10 topics per level</span><h1>January 2027 curriculum</h1></div>
+              <div class="board-summary" id="board-summary">95 filled · 5 open positions</div>
+            </div>
+            <div id="comparison-banner" class="comparison-banner hidden"></div>
+            <div class="levels-scroll">
+              <div id="levels-grid" class="levels-grid"></div>
+            </div>
+          </section>
+
+          <section id="overview-view" class="overview hidden" aria-labelledby="overview-title">
+            <div class="overview-heading">
+              <div><span class="eyebrow">Objective checks, not automatic pedagogy</span><h1 id="overview-title">Curriculum overview</h1></div>
+              <button class="btn btn-outline" id="overview-print-btn" type="button">Print overview</button>
+            </div>
+            <div class="metric-grid" id="metric-grid"></div>
+            <div class="health-grid">
+              <article class="health-card level-map-card">
+                <div class="card-heading"><div><span class="eyebrow">100 positions</span><h2>Level map</h2></div><span class="legend-note">Click a filled cell to edit</span></div>
+                <div id="level-map" class="level-map"></div>
+              </article>
+              <article class="health-card">
+                <div class="card-heading"><div><span class="eyebrow">Items to decide</span><h2>Draft observations</h2></div></div>
+                <ul id="alert-list" class="alert-list"></ul>
+              </article>
+            </div>
+            <article class="health-card table-card">
+              <div class="card-heading"><div><span class="eyebrow">New vs reinforcement</span><h2>Balance by level</h2></div><span class="legend-note">Roles remain unclassified until the coaches decide</span></div>
+              <div class="table-scroll"><table class="level-table"><thead><tr><th>Level</th><th>Filled</th><th>New</th><th>Reinforcement</th><th>Recap</th><th>Unclassified</th><th>Agreed</th></tr></thead><tbody id="level-table-body"></tbody></table></div>
+            </article>
+            <article class="brief-card">
+              <div><span class="eyebrow">Curriculum brief</span><h2>What this draft is designed to do</h2></div>
+              <div class="brief-grid">
+                <p>Ten smaller steps make promotion more flexible. Each level is designed around ten topics that normally cover one term.</p>
+                <p>The working target is roughly five new topics and five reinforcements, but this draft does not assign those labels automatically.</p>
+                <p>Future tracks remain outside the ten-level grid: <strong>Advanced Class · White King</strong> and <strong>Masters Class · Black King</strong>.</p>
+                <ol><li>List of topics</li><li>Examples for every topic</li><li>How to explain every topic</li><li>Optional adapted workbook</li></ol>
+              </div>
+            </article>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div id="inspector-backdrop" class="inspector-backdrop hidden"></div>
+    <aside id="inspector" class="inspector" role="dialog" aria-modal="true" aria-labelledby="inspector-heading" aria-hidden="true" inert>
+      <header class="inspector-header">
+        <div><span class="eyebrow">Topic editor</span><h2 id="inspector-heading">Topic</h2><p id="inspector-location"></p></div>
+        <button class="icon-btn light" id="close-inspector" type="button" aria-label="Close topic editor">×</button>
+      </header>
+      <div class="inspector-body">
+        <label class="field"><span>Topic title</span><input id="edit-title" maxlength="140" /></label>
+        <div class="form-grid">
+          <label class="field"><span>Decision status</span><select id="edit-status"></select></label>
+          <label class="field"><span>Curriculum role</span><select id="edit-role"></select></label>
+        </div>
+        <label class="field"><span>Category / strand</span><input id="edit-category" maxlength="80" placeholder="e.g. Tactics, Endgames, Strategy" /></label>
+        <div class="move-panel">
+          <span class="field-label">Move without dragging</span>
+          <div class="form-grid move-grid">
+            <select id="edit-level" aria-label="Destination"></select>
+            <select id="edit-position" aria-label="Position"></select>
+            <button class="btn btn-outline" id="move-card-btn" type="button">Move</button>
+          </div>
+        </div>
+        <div class="vote-control"><div><span aria-hidden="true">✓</span><span>Coach support</span></div><div><button id="vote-down" type="button" aria-label="Remove support">−</button><strong id="vote-count">0</strong><button id="vote-up" type="button" aria-label="Add support">＋</button></div></div>
+        <label class="field notes"><span>Meeting notes</span><textarea id="edit-notes" maxlength="1500" rows="7" placeholder="Questions, rationale or agreed next action…"></textarea><small><span id="notes-count">0</span>/1500</small></label>
+        <button class="btn btn-primary full-width" id="save-topic-btn" type="button">Save topic changes</button>
+      </div>
+      <footer class="inspector-footer">
+        <button class="btn btn-outline" id="duplicate-card-btn" type="button">Duplicate</button>
+        <button class="btn btn-outline" id="unassign-card-btn" type="button">Move to unassigned</button>
+        <button class="btn btn-danger" id="delete-card-btn" type="button">Delete</button>
+      </footer>
+    </aside>
+
+    <dialog id="add-topic-dialog" class="modal">
+      <form method="dialog" id="add-topic-form">
+        <div class="modal-heading"><div><span class="eyebrow">Add to curriculum</span><h2 id="add-dialog-title">Add topic</h2></div><button class="icon-btn" type="button" data-close-dialog aria-label="Close">×</button></div>
+        <label class="field"><span>Topic title</span><input id="add-title" maxlength="140" required /></label>
+        <p id="add-source-meta" class="source-meta"></p>
+        <div class="form-grid">
+          <label class="field"><span>Destination</span><select id="add-level"></select></label>
+          <label class="field"><span>Position</span><select id="add-position"></select></label>
+        </div>
+        <div class="modal-actions"><button class="btn btn-outline" value="cancel" type="button" data-close-dialog>Cancel</button><button class="btn btn-primary" value="default" type="submit">Add topic</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="share-dialog" class="modal">
+      <form method="dialog">
+        <div class="modal-heading"><div><span class="eyebrow">Independent collaboration</span><h2>Share an editable copy</h2></div><button class="icon-btn" value="cancel" aria-label="Close">×</button></div>
+        <p>This link opens a snapshot of the current board. Changes made by another coach will not update your board automatically.</p>
+        <textarea id="share-link" class="share-link" rows="5" readonly aria-label="Shareable board link"></textarea>
+        <div class="privacy-note"><span aria-hidden="true">ⓘ</span><span>The link includes topic titles, statuses, votes and meeting notes. Anyone who receives it can read that information.</span></div>
+        <div class="modal-actions"><button class="btn btn-outline" value="cancel">Close</button><button class="btn btn-primary" id="copy-share-btn" value="none" type="button">Copy link</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="versions-dialog" class="modal modal-wide">
+      <form method="dialog">
+        <div class="modal-heading"><div><span class="eyebrow">Local recovery points</span><h2>Saved versions</h2></div><button class="icon-btn" value="cancel" aria-label="Close">×</button></div>
+        <div class="snapshot-create"><input id="snapshot-name" maxlength="80" placeholder="e.g. Coaches meeting · Round 1" /><button class="btn btn-primary" id="save-snapshot-btn" type="button">Save current board</button></div>
+        <div id="snapshot-list" class="snapshot-list"></div>
+      </form>
+    </dialog>
+
+    <dialog id="import-dialog" class="modal">
+      <form method="dialog">
+        <div class="modal-heading"><div><span class="eyebrow">Protected import</span><h2>Open shared copy?</h2></div><button class="icon-btn" id="close-import-btn" type="button" aria-label="Keep current board and close">×</button></div>
+        <div id="import-summary" class="import-summary"></div>
+        <p>Your current board will be saved automatically as a version before the imported copy is opened.</p>
+        <div class="modal-actions"><button class="btn btn-outline" id="keep-board-btn" value="cancel" type="button">Keep my board</button><button class="btn btn-primary" id="open-import-btn" value="none" type="button">Open shared copy</button></div>
+      </form>
+    </dialog>
+
+    <div id="presentation-bar" class="presentation-bar hidden">
+      <div><span>Meeting mode</span><strong id="presentation-title">January 2027 · Initial curriculum draft</strong></div>
+      <div class="presentation-total"><strong id="presentation-count">95</strong><span>/100 topics</span></div>
+      <button class="btn btn-outline" id="fullscreen-btn" type="button">Full screen</button>
+      <button class="btn btn-light" id="exit-presentation-btn" type="button">Exit presentation</button>
+    </div>
+
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+    <div id="cross-tab-alert" class="cross-tab-alert hidden"><span>This board changed in another tab.</span><button type="button" id="reload-board-btn">Load latest</button></div>
+  </body>
+</html>
